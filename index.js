@@ -8,6 +8,20 @@ const { readJson, writeJson } = pkg;
 const API_URL = "http://127.0.0.1:7788";
 const OUTPUT_FILE = "./cashtag_results.json";
 
+// Function to get current date and time in CET
+const getCETTimestamp = () => {
+  const now = new Date();
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(now);
+};
+
 // Function to call the AI Agent API
 const fetchAIResults = async () => {
   try {
@@ -62,13 +76,19 @@ const fetchAIResults = async () => {
     // Parse the new results
     const newResults = parseResults(result.data);
 
+    // Add timestamp to each result
+    const timestampedResults = newResults.map(item => ({
+      ...item,
+      timestamp: getCETTimestamp(),
+    }));
+
     // Read existing results
     const existingResults = await readJson(OUTPUT_FILE).catch(() => []);
 
     // Merge new and existing results, avoiding duplicates
     const mergedResults = [
       ...existingResults,
-      ...newResults.filter(
+      ...timestampedResults.filter(
         newItem =>
           !existingResults.some(
             existingItem =>
