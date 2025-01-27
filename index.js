@@ -28,7 +28,7 @@ const fetchAIResults = async () => {
       disable_security: true,
       enable_recording: true,
       task: `
-      Analyze the latest 10 tweets from the specified X.com page to extract cashtags and contract addresses (CAs) as follows:
+      Analyze the latest 10 tweets from the X.com following page to extract cashtags and contract addresses (CAs) as follows:
 
       1. Identify cashtags (e.g., $TOKEN) and their corresponding contract addresses (CAs). 
         - Add the results to a JSON array: 
