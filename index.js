@@ -1,8 +1,8 @@
 import { Client } from "@gradio/client";
-import pkg from 'fs-extra';
+import pkg from "fs-extra";
 import { schedule } from "node-cron";
 
-const { writeJson } = pkg;
+const { readJson, writeJson } = pkg;
 
 // Configuration
 const API_URL = "http://127.0.0.1:7788";
@@ -38,8 +38,8 @@ const fetchAIResults = async () => {
         - If found, add it to the JSON array. Otherwise, add: { "cashtag": "$TOKEN", "contract_address": null }.
       3. If a token is mentioned without a cashtag:
         - Record it as: { "cashtag": "unknown_cashtag", "contract_address": "CA" } (or null if no CA is found).
-      4. If you find something beign shilled on the tweet but there is no cashtag or CA found, try to search on X.com key words of the message to try to find the cashtag or the CA and then follow the previous points to find what is needed.
-      5. If nothing is found after previous points, just skip the tweet and go to the next task, try to not return empty data like:
+      4. If you find something being shilled on the tweet but there is no cashtag or CA found, try to search on X.com key words of the message to try to find the cashtag or the CA and then follow the previous points to find what is needed.
+      5. If nothing is found after previous points, just skip the tweet and go to the next task. Try to not return empty data like:
         - { cashtag: 'unknown_cashtag', contract_address: null }
         As this is not useful at all.
 
@@ -57,10 +57,16 @@ const fetchAIResults = async () => {
       tool_calling_method: "auto",
     });
 
-    // Parse and save results
-    const cashtags = parseResults(result.data);
-    await writeJson(OUTPUT_FILE, cashtags, { spaces: 2 });
-    console.log("Results saved:", cashtags);
+    // Parse the new results
+    const newResults = parseResults(result.data);
+
+    // Merge with existing results
+    const existingResults = await readJson(OUTPUT_FILE).catch(() => []);
+    const mergedResults = [...existingResults, ...newResults];
+
+    // Save the updated results to the file
+    await writeJson(OUTPUT_FILE, mergedResults, { spaces: 2 });
+    console.log("Results saved:", mergedResults);
   } catch (error) {
     console.error("Error while calling AI Agent:", error.message);
   }
