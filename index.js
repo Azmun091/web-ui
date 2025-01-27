@@ -22,6 +22,13 @@ const getCETTimestamp = () => {
   }).format(now);
 };
 
+// Function to filter out invalid entries
+const filterInvalidEntries = results => {
+  return results.filter(
+    item => !(item.cashtag === null && item.contract_address === null)
+  );
+};
+
 // Function to merge results without overwriting timestamps of old entries
 const mergeResults = (existingResults, newResults) => {
   const existingMap = new Map(
@@ -94,11 +101,17 @@ const fetchAIResults = async () => {
     // Parse the new results
     const newResults = parseResults(result.data);
 
+    // Filter invalid entries
+    const filteredNewResults = filterInvalidEntries(newResults);
+
     // Read existing results
     const existingResults = await readJson(OUTPUT_FILE).catch(() => []);
 
+    // Filter invalid entries from existing results
+    const filteredExistingResults = filterInvalidEntries(existingResults);
+
     // Merge new and existing results
-    const mergedResults = mergeResults(existingResults, newResults);
+    const mergedResults = mergeResults(filteredExistingResults, filteredNewResults);
 
     // Save the updated results to the file
     await writeJson(OUTPUT_FILE, mergedResults, { spaces: 2 });
