@@ -22,7 +22,25 @@ const getCETTimestamp = () => {
   }).format(now);
 };
 
-// Function to call the AI Agent API
+// Function to merge results without overwriting timestamps of old entries
+const mergeResults = (existingResults, newResults) => {
+  const existingMap = new Map(
+    existingResults.map(item => [item.cashtag + item.contract_address, item])
+  );
+
+  newResults.forEach(newItem => {
+    const key = newItem.cashtag + newItem.contract_address;
+    if (!existingMap.has(key)) {
+      // Add new item with a timestamp
+      existingMap.set(key, { ...newItem, timestamp: getCETTimestamp() });
+    }
+    // If key exists, do nothing to avoid overwriting the timestamp
+  });
+
+  return Array.from(existingMap.values());
+};
+
+// Main function to fetch AI results and process them
 const fetchAIResults = async () => {
   try {
     console.log("Starting AI Agent job...");
@@ -76,27 +94,11 @@ const fetchAIResults = async () => {
     // Parse the new results
     const newResults = parseResults(result.data);
 
-    // Add timestamp to each result
-    const timestampedResults = newResults.map(item => ({
-      ...item,
-      timestamp: getCETTimestamp(),
-    }));
-
     // Read existing results
     const existingResults = await readJson(OUTPUT_FILE).catch(() => []);
 
-    // Merge new and existing results, avoiding duplicates
-    const mergedResults = [
-      ...existingResults,
-      ...timestampedResults.filter(
-        newItem =>
-          !existingResults.some(
-            existingItem =>
-              existingItem.cashtag === newItem.cashtag &&
-              existingItem.contract_address === newItem.contract_address
-          )
-      ),
-    ];
+    // Merge new and existing results
+    const mergedResults = mergeResults(existingResults, newResults);
 
     // Save the updated results to the file
     await writeJson(OUTPUT_FILE, mergedResults, { spaces: 2 });
