@@ -34,7 +34,7 @@ const fetchAIResults = async () => {
         - Add the results to a JSON array: 
           Example: [{ "cashtag": "$TOKEN", "contract_address": "CA" }]
       2. If a cashtag is found but no CA is included:
-        - Search X.com for the CA (max 10 tweets of search).
+        - Search on X.com search functionality for the CA (max 10 tweets of search).
         - If found, add it to the JSON array. Otherwise, add: { "cashtag": "$TOKEN", "contract_address": null }.
       3. If a token is mentioned without a cashtag:
         - Record it as: { "cashtag": "unknown_cashtag", "contract_address": "CA" } (or null if no CA is found).
@@ -42,6 +42,8 @@ const fetchAIResults = async () => {
       5. If nothing is found after previous points, just skip the tweet and go to the next task. Try to not return empty data like:
         - { cashtag: 'unknown_cashtag', contract_address: null }
         As this is not useful at all.
+
+      If you are not able to complete all the taks in 10 minutes, then stop completly.
 
       The final output should only contain a JSON array of the format:
       [
