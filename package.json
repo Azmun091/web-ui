@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node index.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "fs-extra": "^11.3.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@gradio/client": "^1.10.0"
+  }
+}

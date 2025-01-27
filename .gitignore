@@ -187,3 +187,7 @@ data/
 
 # For Config Files (Current Settings)
 .config.pkl
+
+# Node
+node_modules/
+cashtag_results.json
