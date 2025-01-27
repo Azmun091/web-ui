@@ -60,9 +60,21 @@ const fetchAIResults = async () => {
     // Parse the new results
     const newResults = parseResults(result.data);
 
-    // Merge with existing results
+    // Read existing results
     const existingResults = await readJson(OUTPUT_FILE).catch(() => []);
-    const mergedResults = [...existingResults, ...newResults];
+
+    // Merge new and existing results, avoiding duplicates
+    const mergedResults = [
+      ...existingResults,
+      ...newResults.filter(
+        newItem =>
+          !existingResults.some(
+            existingItem =>
+              existingItem.cashtag === newItem.cashtag &&
+              existingItem.contract_address === newItem.contract_address
+          )
+      ),
+    ];
 
     // Save the updated results to the file
     await writeJson(OUTPUT_FILE, mergedResults, { spaces: 2 });
